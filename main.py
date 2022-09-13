@@ -61,18 +61,28 @@ while True:
         finish_button.click()
 
         # PAGE 4
-        time.sleep(50)
-        assert "Service selection" in driver.title
-        if "There are currently no dates available for the selected service!" in driver.page_source:
-            print("No appointment found,", dt_string)
-            driver.save_screenshot(f'./logs/neg/{dt_string}.png')
-            driver.close()
-        else:
-            print("Found appointment,", dt_string)
-            driver.save_screenshot(f'./logs/pos/{dt_string}.png')
-            play_alarm()
-            while True:
-                time.sleep(10000)
+        flag = False
+        for i in range(0, 15):
+            time.sleep(5)
+            if "There are currently no dates available for the selected service!" in driver.page_source:
+                print("No appointment found,", dt_string)
+                driver.save_screenshot(f'./logs/neg/{dt_string}.png')
+                flag = True
+                break
+            elif "Appointment selection" in driver.page_source:
+                print("Found appointment,", dt_string)
+                time.sleep(3)
+                driver.save_screenshot(f'./logs/pos/{dt_string}.png')
+                play_alarm()
+                time.sleep(1700)
+        
+        if not flag:
+            #if we get here, we have an error:
+            print(f"{dt_string}. Error, for loop exited without resolution.")
+            driver.save_screenshot(f'./logs/err/{dt_string}.png')
+
+        driver.close()
+
     except Exception as e:
         print(f"{dt_string}. Error: {e}")
         driver.save_screenshot(f'./logs/err/{dt_string}.png')
