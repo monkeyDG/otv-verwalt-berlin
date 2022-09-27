@@ -57,29 +57,36 @@ while True:
         studying_permit.click()
 
         time.sleep(9)
-        finish_button = driver.find_element(By.CSS_SELECTOR, '#applicationForm\:managedForm\:proceed')
-        finish_button.click()
 
-        # PAGE 4
-        flag = False
-        for i in range(0, 15):
-            time.sleep(5)
-            if "There are currently no dates available for the selected service!" in driver.page_source:
-                print("No appointment found,", dt_string)
-                driver.save_screenshot(f'./logs/neg/{dt_string}.png')
-                flag = True
-                break
-            elif "Appointment selection" in driver.page_source:
-                print("Found appointment,", dt_string)
-                time.sleep(3)
-                driver.save_screenshot(f'./logs/pos/{dt_string}.png')
-                play_alarm()
-                time.sleep(1700)
-        
-        if not flag:
-            #if we get here, we have an error:
-            print(f"{dt_string}. Error, for loop exited without resolution.")
-            driver.save_screenshot(f'./logs/err/{dt_string}.png')
+        #refresh loop
+        found_appointment = False
+        while found_appointment == False:
+            finish_button = driver.find_element(By.CSS_SELECTOR, '#applicationForm\:managedForm\:proceed')
+            finish_button.click()
+            # PAGE 4
+            flag = False
+            for i in range(0, 60):
+                if "There are currently no dates available for the selected service!" in driver.page_source:
+                    print("No appointment found,", dt_string)
+                    driver.save_screenshot(f'./logs/neg/{dt_string}.png')
+                    flag = True
+                    break
+                elif "Appointment selection" in driver.page_source:
+                    print("Found appointment,", dt_string)
+                    time.sleep(3)
+                    driver.save_screenshot(f'./logs/pos/{dt_string}.png')
+                    play_alarm()
+                    time.sleep(1700)
+                    found_appointment = True
+                time.sleep(1)
+            
+            if not flag:
+                #if we get here, we have an error:
+                print(f"{dt_string}. Error, for loop exited without resolution.")
+                driver.save_screenshot(f'./logs/err/{dt_string}.png')
+
+            time.sleep(3)
+            driver.refresh()
 
         driver.close()
 
